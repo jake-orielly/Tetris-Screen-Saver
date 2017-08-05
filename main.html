@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border: 1px solid #d3d3d3;
+    background-color: #4f4f4f;
+}
+</style>
+</head>
+<body onload="startGame()">
+<script>
+var board = [];
+var tiles = [];
+var tileColor = "#bcbcbc"
+var blockwidth = 30;
+var boardX = blockwidth*10-2;
+var boardY = blockwidth*20-2;
+    
+var boardWidth = 10;
+var boardHeight = 20;
+    
+var pieces = [];
+var lastPiece;
+    
+var temp = blockwidth-2;    
+var frame;
+var curr;
+    
+function startGame() {
+    for (var i = 0; i < boardWidth; i++) {
+        tiles[i] = [];
+        for (var j = 0; j < boardHeight; j++) {
+            tiles[i].push(new component(temp, temp, tileColor, 0 + i*(temp+2), 0 + j*(temp+2)));
+        }
+    }
+    
+    makePiece(0);
+    
+    frame = 0;
+	gameArea.start();
+}
+
+var gameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = boardX;
+        this.canvas.height = boardY;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+		this.interval = setInterval(updateGameArea, 20);
+    },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function component(width, height, color, x, y, name) {
+	this.name = name;
+    this.width = width;
+    this.height = height;
+	this.speedX = 0;
+    this.speedY = 0;
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.update = function() {
+        ctx = gameArea.context;
+		if (this.name == "text") {
+		  ctx.font = this.width + " " + this.height;
+		  ctx.fillStyle = this.color;
+		  ctx.fillText(this.text, this.x, this.y);
+		}
+		else {
+		  ctx.fillStyle = this.color;
+		  ctx.fillRect(this.x, this.y, this.width, this.height);
+		}
+    }
+	
+    this.newPos = function() {
+		this.x += this.speedX;
+		this.y += this.speedY;        
+	}
+} 
+
+function updateGameArea() {
+    gameArea.clear();
+    
+    for (var i = 0; i < tiles.length; i++) {
+        for (var j = 0; j < tiles[i].length; j++) {
+            tiles[i][j].color = tileColor;
+        }
+    }
+    
+    for (var i = 0; i < pieces.length; i++)
+        for (var j = 2; j < pieces[i].length; j++)
+            tiles[pieces[i][j][0]][pieces[i][j][1]].color = pieces[i][1];
+    
+    for (var i = 0; i < tiles.length; i++) {
+        for (var j = 0; j < tiles[i].length; j++) {
+            tiles[i][j].update();
+        }
+    }
+
+	stopMoving(tiles);
+    
+    if (frame%10 == 0) {
+        if (lastPiece[0]) {
+            movePiece(lastPiece);
+        }
+    }
+    
+    frame++;
+}
+    
+function movePiece(given) {
+    var bottom = false;
+    
+    for (var i = 2; i < given.length; i++) {
+        if (given[i][1] > boardHeight-2)
+            bottom = true;
+    }
+    
+    for (var i = 2; i < given.length; i++) {
+        for (var j = 0; j < pieces.length; j++) {
+            for (var k = 1; k < pieces[j].length; k++) {
+                if (given[i][1] > pieces[j][k][1] - 2 && pieces[j] != given) {
+                        bottom = true;
+                }
+            }
+        }
+    }
+    
+    if (!bottom) {
+        for (var i = 2; i < given.length; i++) {
+            given[i][1] += 1;
+        }
+    }
+    
+    else {
+        given[0] = false;
+        makePiece(pieces.length);
+        bottom = false;
+    }
+}
+
+    
+function stopMoving(given) {
+	given.speedX = 0;
+    given.speedY = 0;
+}
+    
+function makePiece(given) {
+    pieces[pieces.length] = [];
+    lastPiece = pieces[pieces.length-1];
+    lastPiece.push(true);
+    
+    if (given == 0) { //I
+        lastPiece.push("cyan");
+        for (var i = 0; i < 4; i++)
+            lastPiece.push([i,0]);
+    }
+    
+    if (given == 1) { //J
+        lastPiece.push("blue");
+        for (var i = 0; i < 3; i++) 
+            lastPiece.push([i,1]);
+        lastPiece.push([0,0]);
+    }
+    
+    if (given == 2) { //L
+        lastPiece.push("orange");
+        for (var i = 0; i < 3; i++)
+            lastPiece.push([i,1]);
+        lastPiece.push([2,0]);
+    }
+    
+    if (given == 3) { //O
+        lastPiece.push("yellow");
+        lastPiece.push([0,0]);
+        lastPiece.push([0,1]);
+        lastPiece.push([1,0]);
+        lastPiece.push([1,1]);
+    }
+    
+    if (given == 4) { //S
+        lastPiece.push("green");
+        lastPiece.push([0,1]);
+        lastPiece.push([0,2]);
+        lastPiece.push([1,0]);
+        lastPiece.push([1,1]);
+    }
+    
+    if (given == 5) { //T
+        lastPiece.push("purple");
+        for (var i = 0; i < 3; i++)
+            lastPiece.push([i,1]);
+        lastPiece.push([1,0]);
+    }
+    
+    if (given == 6) { //Z
+        lastPiece.push("red");
+        lastPiece.push([0,0]);
+        lastPiece.push([0,1]);
+        lastPiece.push([1,1]);
+        lastPiece.push([1,2]);
+    }
+    
+    for (var i = 2; i < lastPiece.length; i++)
+        tiles[lastPiece[i][0]][lastPiece[i][1]].color = lastPiece[1]; //The tile at the position of the block in our piece becomes that piece's color   
+}    
+    
+</script>
+
+</body>
+</html>
