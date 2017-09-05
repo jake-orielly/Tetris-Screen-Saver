@@ -128,7 +128,7 @@ function movePiece(given) {
     for (var i = 2; i < given.length; i++) {
         for (var j = 0; j < pieces.length; j++) {
             for (var k = 1; k < pieces[j].length; k++) {
-                if (given[i][1] > pieces[j][k][1] - 2 && given[i][0] > pieces[j][k][0] && pieces[j] != given) {
+                if (given[i][1] == pieces[j][k][1] - 1 && given[i][0] == pieces[j][k][0] && pieces[j] != given) {
                         bottom = true;
                 }
             }
@@ -152,10 +152,6 @@ function movePiece(given) {
 function handleInput(given) {
     if (given == 65) {shiftPiece(-1)}
     else if (given == 68) {shiftPiece(1)}
-    /*if (gameArea.keys[87]) {alert(10)}
-    if (gameArea.keys[83]) {player.speedY = 5;}
-    if (gameArea.keys[65]) {player.speedX = -5; }
-    if (gameArea.keys[68]) {player.speedX = 5; }*/
 }
     
 function shiftPiece(given) {
